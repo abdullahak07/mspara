@@ -1,0 +1,8 @@
+import {authenticated,sameOrigin} from '../../../lib/auth.mjs';
+import {redis,workspaceKey,saveScript} from '../../../lib/store.mjs';
+import {validateWorkspace} from '../../../lib/invoice.mjs';
+export const runtime='nodejs';
+export const dynamic='force-dynamic';
+const response=(data:unknown,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
+export async function GET(request:Request){if(!authenticated(request))return response({error:'Your session expired. Reload to sign in.'},401);try{const data=await redis(['GET',workspaceKey]);return response(data?JSON.parse(data):{state:null,version:0});}catch{return response({error:'Could not load invoices. Check the Redis connection in Vercel.'},503);}}
+export async function PUT(request:Request){if(!authenticated(request))return response({error:'Your session expired. Download a backup, then reload to sign in.'},401);if(!sameOrigin(request))return response({error:'Invalid request origin.'},403);try{const text=await request.text();if(text.length>4000000)return response({error:'Invoice history is too large. Export a backup.'},413);const {state,version}=JSON.parse(text);if(!Number.isSafeInteger(version)||version<0)return response({error:'Invalid version.'},400);const error=validateWorkspace(state);if(error)return response({error},400);const ok=await redis(['EVAL',saveScript,1,workspaceKey,String(version),JSON.stringify({state,version:version+1})]);if(!ok)return response({error:'Invoices changed in another tab. Download a backup of your edits, then reload.'},409);return response({version:version+1});}catch{return response({error:'Could not save. Keep this tab open and retry.'},503);}}
