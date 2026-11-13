@@ -10,3 +10,5 @@
 fieldset.editor{min-width:0;margin:0}
 
 .pdf-ready{padding:12px;background:#f0f5eb;border-radius:4px;margin-bottom:14px;font-size:12px}.pdf-ready a{color:#315b49;text-decoration:underline;margin-left:8px}
+
+.history-entry{border-bottom:1px solid #edf0ea;padding-bottom:14px}.history-entry .history-item{border-bottom:0;padding-bottom:12px}.history-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}.history-actions .secondary{padding:7px 10px;font-size:11px}.history-actions .delete-invoice{color:#943e30;border-color:#ecd0c7}.history-item>span:nth-child(2){overflow:hidden}
